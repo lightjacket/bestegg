@@ -1,0 +1,11 @@
+{
+  "name": "bestegg",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "now": "now"
+  },
+  "dependencies": {
+    "now": "^17.1.1"
+  }
+}
