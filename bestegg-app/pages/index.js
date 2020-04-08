@@ -2,15 +2,19 @@ import Head from 'next/head'
 import {useAuth0} from "../components/auth0";
 import {useQuery, gql} from "@apollo/client";
 
-const HELLO = gql`
-    { hello }
+
+const TEST = gql`
+    query {
+        test
+    }
 `;
 
 const Inner = () => {
-    const info = useQuery(HELLO);
+    const info = useQuery(TEST);
     console.log('info', info);
     return <div></div>;
 };
+
 
 const Home = () => {
     const {token} = useAuth0();

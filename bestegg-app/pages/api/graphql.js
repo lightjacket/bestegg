@@ -1,10 +1,10 @@
 import * as jwt from 'express-jwt';
 import * as jwks from "jwks-rsa";
 import {graphql, buildSchema} from 'graphql';
-import {importSchema} from 'graphql-import'
 import {GraphQLClient} from "graphql-request";
+import schemaStr from '../../schema/clientSchema.gql';
 
-const schema = buildSchema(importSchema("schema/clientSchema.gql"));
+const schema = buildSchema(schemaStr);
 
 const jwtCheck = jwt({
     secret: jwks.expressJwtSecret({
@@ -47,6 +47,9 @@ const root = {
             }
         `, {user, picId: eggPicId});
         return {status: 'ok'};
+    },
+    test: async (obj, {user}, {variableValues: {}}) => {
+        return 'hello!';
     }
 };
 

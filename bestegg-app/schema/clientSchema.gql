@@ -12,6 +12,7 @@ type EggPic {
 
 type Query {
     myEggPics: [EggPic!]!
+    test: String!
 }
 
 schema {
