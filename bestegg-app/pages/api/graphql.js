@@ -2,6 +2,7 @@ import * as jwt from 'express-jwt';
 import * as jwks from "jwks-rsa";
 import {graphql, buildSchema} from 'graphql';
 import {importSchema} from 'graphql-import'
+import {GraphQLClient} from "graphql-request";
 
 const schema = buildSchema(importSchema("schema/clientSchema.gql"));
 
@@ -28,10 +29,23 @@ function runMiddleware(req, res, fn) {
     })
 }
 
+const faunadb = new GraphQLClient('https://graphql.fauna.com/graphql', {
+    headers: {
+        Authorization: `Bearer ${process.env.NEXT_FAUNADB_SECRET}`
+    }
+});
+
 // The root provides a resolver function for each API endpoint
 const root = {
-    addEggPic: (obj, {user}, {variableValues: {eggPicId}}) => {
-        console.log(`save ${eggPicId} for ${user}`);
+    addEggPic: async (obj, {user}, {variableValues: {eggPicId}}) => {
+        await faunadb.request(`
+            mutation AddEggId($user: String!, $picId: String!) {
+                createEggPic(data: {user: $user, id: $picId}) {
+                    user
+                    id
+                }
+            }
+        `, {user, picId: eggPicId});
         return {status: 'ok'};
     }
 };
@@ -44,7 +58,6 @@ async function handler(req, res) {
         res.end('Forbidden');
         return;
     }
-    console.log('user', req.user);
     const result = await graphql(schema, req.body.query, root, {user: req.user.sub}, req.body.variables);
     res.end(JSON.stringify(result));
 }

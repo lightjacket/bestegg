@@ -23,6 +23,13 @@ export const GraphQLProvider = ({children}) => {
         });
         return <ApolloProvider client={client}>{children}</ApolloProvider>;
     } else {
-        return children;
+        const client = new ApolloClient({
+            cache: new InMemoryCache(),
+            link: new HttpLink({
+                uri: '/api/graphql', fetch: (...args) => {
+                }
+            })
+        });
+        return <ApolloProvider client={client}>{children}</ApolloProvider>;
     }
 };

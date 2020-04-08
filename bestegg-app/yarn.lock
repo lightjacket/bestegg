@@ -3844,7 +3844,7 @@ graphql-import@^1.0.1:
     "@graphql-toolkit/schema-merging" "0.9.8-alpha-b446d3c.44+b446d3c"
     "@graphql-toolkit/url-loader" "0.9.8-alpha-b446d3c.44+b446d3c"
 
-graphql-request@^1.5.0:
+graphql-request@^1.5.0, graphql-request@^1.8.2:
   version "1.8.2"
   resolved "https://registry.yarnpkg.com/graphql-request/-/graphql-request-1.8.2.tgz#398d10ae15c585676741bde3fc01d5ca948f8fbe"
   integrity sha512-dDX2M+VMsxXFCmUX0Vo0TopIZIX4ggzOtiCsThgtrKR4niiaagsGTDIHj3fsOMFETpa064vzovI+4YV4QnMbcg==

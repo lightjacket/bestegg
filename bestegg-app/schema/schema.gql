@@ -2,19 +2,11 @@ type Status {
     status: String!
 }
 
-type Mutation {
-    addEggPic(user: String!, id: String!): Status!
-}
-
 type EggPic {
+    user: String!
     id: String!
 }
 
 type Query {
-    myEggPics(user: !String): [EggPic!]!
-}
-
-schema {
-    query: Query,
-    mutation: Mutation
+    myEggPics(user: String!): [EggPic!]!
 }
