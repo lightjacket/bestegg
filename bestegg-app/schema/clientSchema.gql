@@ -3,7 +3,7 @@ type Status {
 }
 
 type Mutation {
-    addEggPic(user: String!, id: String!): Status!
+    addEggPic(eggPicId: String!): Status!
 }
 
 type EggPic {
@@ -11,7 +11,7 @@ type EggPic {
 }
 
 type Query {
-    myEggPics(user: !String): [EggPic!]!
+    myEggPics: [EggPic!]!
 }
 
 schema {

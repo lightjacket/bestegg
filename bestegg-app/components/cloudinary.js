@@ -1,6 +1,16 @@
 import {useEffect, useRef, useState} from "react";
+import {gql, useMutation} from '@apollo/client';
+
+const ADD_EGG = gql`
+    mutation AddEgg($eggPicId: String!) {
+        addEggPic(eggPicId: $eggPicId) {
+            status
+        }
+    }
+`;
 
 export const Upload = () => {
+    const [saveId, {loading: saving}] = useMutation(ADD_EGG);
     const [widget, setWidget] = useState(null);
 
     useEffect(() => {
@@ -17,6 +27,7 @@ export const Upload = () => {
                     }, (error, result) => {
                         if (!error && result && result.event === "success") {
                             let id = result.info.public_id;
+                            saveId({variables: {eggPicId: id}});
                         }
                     }
                 )
@@ -24,7 +35,7 @@ export const Upload = () => {
         };
         checkForCloudinary();
         return () => {
-            if(timeout) clearTimeout(timeout);
+            if (timeout) clearTimeout(timeout);
         }
     }, []);
 

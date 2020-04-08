@@ -23,6 +23,10 @@
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "react-query": "^1.2.1",
-    "tailwindcss": "^1.2.0"
+    "tailwindcss": "^1.2.0",
+    "graphql-import": "^1.0.1"
+  },
+  "devDependencies": {
+    "babel-plugin-import-graphql": "^2.7.0"
   }
 }

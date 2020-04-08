@@ -1,6 +1,9 @@
 import * as jwt from 'express-jwt';
 import * as jwks from "jwks-rsa";
 import {graphql, buildSchema} from 'graphql';
+import {importSchema} from 'graphql-import'
+
+const schema = buildSchema(importSchema("schema/clientSchema.gql"));
 
 const jwtCheck = jwt({
     secret: jwks.expressJwtSecret({
@@ -25,18 +28,12 @@ function runMiddleware(req, res, fn) {
     })
 }
 
-const schema = buildSchema(`
-  type Query {
-    hello: String
-  }
-`);
-
 // The root provides a resolver function for each API endpoint
 const root = {
-    hello: (obj, context) => {
-        console.log('context', context);
-        return `Hello ${context.user}!`;
-    },
+    addEggPic: (obj, {user}, {variableValues: {eggPicId}}) => {
+        console.log(`save ${eggPicId} for ${user}`);
+        return {status: 'ok'};
+    }
 };
 
 async function handler(req, res) {
@@ -48,8 +45,9 @@ async function handler(req, res) {
         return;
     }
     console.log('user', req.user);
-    const result = await graphql(schema, req.body.query, root, {user: req.user.sub});
+    const result = await graphql(schema, req.body.query, root, {user: req.user.sub}, req.body.variables);
     res.end(JSON.stringify(result));
 }
 
 export default handler
+
