@@ -35,8 +35,6 @@ const faunadb = new GraphQLClient('https://graphql.fauna.com/graphql', {
     }
 });
 
-const randomId = () =>  Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-
 // The root provides a resolver function for each API endpoint
 const root = {
     addEggPic: async ({eggPicId, eggId}, {user}) => {
@@ -79,14 +77,15 @@ const root = {
         return eggs.eggs.data.map(e => ({name: e.name, picIds: e.picIds, id: e._id}));
     },
     addEgg: async ({name, picIds}, {user}) => {
-        const {createEgg: {_id: eggId}} = await faunadb.request(`
+        const result = await faunadb.request(`
            mutation CreateEgg($name: String!, $user: String!, $picIds: [String!]!) {
-              createEgg(data: {name: $name, picIds: $picIds, user: $user, id: $eggId}) {
+              createEgg(data: {name: $name, picIds: $picIds, user: $user}) {
                 _id
               }
            }
-        `, {user, name, eggId: eggId, picIds});
-        return {id: eggId};
+        `, {user, name, picIds});
+        // {createEgg: {_id: eggId}}
+        return {id: result.createEgg._id};
     },
     test: async ({}, {user}) => {
         return 'hello!';

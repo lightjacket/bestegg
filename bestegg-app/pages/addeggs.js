@@ -42,7 +42,7 @@ const Egg = ({name, picIds, id}) => {
                 </Upload>
             </div>
         </div>
-        <div className='flex'>
+        <div className='flex flex-wrap'>
             {picIds.map(i => {
                 return <img
                     className='pr-2'
@@ -113,8 +113,6 @@ const NewEgg = () => {
     });
     const [name, setName] = useState('');
     const [picIds, setPicIds] = useState([]);
-
-    console.log('pic ids', picIds);
 
     const addPicId = (id) => setPicIds([id, ...picIds]);
 

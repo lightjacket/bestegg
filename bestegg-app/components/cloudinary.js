@@ -9,11 +9,8 @@ export const CloudinaryContext = ({children}) => {
     const [widget, setWidget] = useState(null);
     const callbacks = useRef([]);
 
-    const [addCallback, removeCallback] = useMemo(() => {
-        return [
-            (f) => callbacks.current = [f, ...callbacks.current],
-            (f) => callbacks.current = callbacks.current.filter(c => c !== f)
-        ]
+    const setCallback = useMemo(() => {
+        return (f) => callbacks.current = f;
     }, []);
 
     useEffect(() => {
@@ -31,7 +28,7 @@ export const CloudinaryContext = ({children}) => {
                     }, (error, result) => {
                         if (!error && result && result.event === "success") {
                             let id = result.info.public_id;
-                            callbacks.current.forEach(c => c(id));
+                            callbacks.current(id);
                         }
                     }
                 )
@@ -45,7 +42,7 @@ export const CloudinaryContext = ({children}) => {
 
     return <>
         <script src="https://widget.cloudinary.com/v2.0/global/all.js" type="text/javascript"/>
-        <CloudinaryWidgetContext.Provider value={{widget, addCallback, removeCallback}}>
+        <CloudinaryWidgetContext.Provider value={{widget, setCallback}}>
             <_CloudinaryContext cloudName={process.env.NEXT_CLOUDINARY_CLOUD_NAME}>
                 {children}
             </_CloudinaryContext>
@@ -54,20 +51,20 @@ export const CloudinaryContext = ({children}) => {
 };
 
 const useCloudinaryWidget = () => {
-    const {widget, addCallback, removeCallback} = useContext(CloudinaryWidgetContext);
-    return {widget, addCallback, removeCallback};
+    const {widget, setCallback} = useContext(CloudinaryWidgetContext);
+    return {widget, setCallback};
 };
 
 export const Upload = ({children, onUpload}) => {
-    const {widget, addCallback, removeCallback} = useCloudinaryWidget();
+    const {widget, setCallback} = useCloudinaryWidget();
 
-    useEffect(() => {
-        addCallback(onUpload);
-        return () => removeCallback(onUpload);
-    }, [addCallback, removeCallback, onUpload]);
+    const onClick = () => {
+        setCallback(onUpload);
+        if(widget) widget.open();
+    };
 
     return <div>
-        <button onClick={() => widget && widget.open()}>
+        <button onClick={onClick}>
             {children}
         </button>
     </div>;
