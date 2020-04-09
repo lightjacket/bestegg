@@ -1,6 +1,6 @@
 import * as jwt from 'express-jwt';
 import * as jwks from "jwks-rsa";
-import {graphql, buildSchema} from 'graphql';
+import {buildSchema, graphql} from 'graphql';
 import {GraphQLClient} from "graphql-request";
 import schemaStr from '../../schema/clientSchema.gql';
 
@@ -35,20 +35,60 @@ const faunadb = new GraphQLClient('https://graphql.fauna.com/graphql', {
     }
 });
 
+const randomId = () =>  Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+
 // The root provides a resolver function for each API endpoint
 const root = {
-    addEggPic: async (obj, {user}, {variableValues: {eggPicId}}) => {
-        await faunadb.request(`
-            mutation AddEggId($user: String!, $picId: String!) {
-                createEggPic(data: {user: $user, id: $picId}) {
-                    user
-                    id
-                }
+    addEggPic: async ({eggPicId, eggId}, {user}) => {
+        const {findEggByID: data} = await faunadb.request(`
+            query FindEgg($eggId: ID!) {
+              findEggByID(id: $eggId) {
+                name
+                picIds
+                user
+              }
             }
-        `, {user, picId: eggPicId});
+        `, {eggId});
+
+        if(data.user !== user) {
+            throw new Error('access denied');
+        }
+
+        await faunadb.request(`
+            mutation AddPic($name: String!, $picIds: [String!]!, $user: String!, $eggId: ID!) {
+              updateEgg(id: $eggId, data: {name: $name, picIds: $picIds, user: $user}) {
+                _id
+              }
+            }
+        `, {...data, eggId, picIds: [eggPicId, ...data.picIds]});
+
         return {status: 'ok'};
     },
-    test: async (obj, {user}, {variableValues: {}}) => {
+    myEggs: async ({}, {user}) => {
+        const eggs = await faunadb.request(`
+            query Eggs($user: String!) {
+                eggs(user: $user) {
+                    data {
+                      name
+                      picIds
+                      _id
+                    }
+                }
+            }
+        `, {user});
+        return eggs.eggs.data.map(e => ({name: e.name, picIds: e.picIds, id: e._id}));
+    },
+    addEgg: async ({name, picIds}, {user}) => {
+        const {createEgg: {_id: eggId}} = await faunadb.request(`
+           mutation CreateEgg($name: String!, $user: String!, $picIds: [String!]!) {
+              createEgg(data: {name: $name, picIds: $picIds, user: $user, id: $eggId}) {
+                _id
+              }
+           }
+        `, {user, name, eggId: eggId, picIds});
+        return {id: eggId};
+    },
+    test: async ({}, {user}) => {
         return 'hello!';
     }
 };

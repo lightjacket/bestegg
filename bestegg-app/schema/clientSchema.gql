@@ -2,16 +2,23 @@ type Status {
     status: String!
 }
 
-type Mutation {
-    addEggPic(eggPicId: String!): Status!
+type AddEgg {
+    id: String!
 }
 
-type EggPic {
+type Mutation {
+    addEggPic(eggPicId: String!, eggId: String!): Status!
+    addEgg(name: String!, picIds: [String!]!): AddEgg!
+}
+
+type Egg {
+    picIds: [String!]!
+    name: String!
     id: String!
 }
 
 type Query {
-    myEggPics: [EggPic!]!
+    myEggs: [Egg!]!
     test: String!
 }
 

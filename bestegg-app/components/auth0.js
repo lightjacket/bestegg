@@ -39,11 +39,14 @@ export const Auth0Provider = ({children}) => {
                         audience: process.env.NEXT_AUDIENCE
                     }));
                 } catch (e) {
-                    if(e.error === 'consent_required')
+                    if (e.error === 'consent_required') {
                         setToken(await auth0Client.getTokenWithPopup({
                             audience: process.env.NEXT_AUDIENCE
                         }));
+                    }
                 }
+            } else {
+                await auth0Client.loginWithRedirect();
             }
 
             setLoading(false);
@@ -75,6 +78,7 @@ export const useAuth0 = () => {
 
     return {
         login: () => auth0.loginWithRedirect(),
+        logout: () => auth0.logout(),
         loading: auth0.loading,
         user: auth0.user,
         token: auth0.token
