@@ -3,3 +3,7 @@ type Egg {
     name: String!
     user: String!
 }
+
+type Query {
+  allOfTheEggs: [Egg!]!
+}

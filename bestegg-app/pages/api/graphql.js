@@ -83,6 +83,20 @@ const root = {
         `, {user});
         return eggs.eggs.data.map(e => ({name: e.name, picIds: e.picIds, id: e._id}));
     },
+    allEggs: async ({}, {user}) => {
+        const {allOfTheEggs} = await faunadb.request(`
+            query AllOfTheEggs {
+              allOfTheEggs {
+                data {
+                  name
+                  _id
+                  picIds
+                }
+              }
+            }
+        `);
+        return allOfTheEggs.data.map(e => ({name: e.name, picIds: e.picIds, id: e._id}));
+    },
     addEgg: async ({name, picIds}, {user}) => {
         const result = await faunadb.request(`
            mutation CreateEgg($name: String!, $user: String!, $picIds: [String!]!) {

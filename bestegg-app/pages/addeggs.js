@@ -1,10 +1,11 @@
 import Head from 'next/head'
 import {Upload} from "../components/cloudinary";
 import {gql, useMutation, useQuery} from "@apollo/client";
+import * as React from "react";
 import {useState} from "react";
 import {Loader, SmallLoader} from "../components/loader";
-import * as React from 'react';
-import {Image} from 'cloudinary-react';
+import {EggPic} from "../components/eggpic";
+import {Modal} from "../components/modal";
 
 const MY_EGGS = gql`
     query MyEggs {
@@ -59,13 +60,6 @@ const DeleteEgg = ({id}) => {
     </Modal>;
 };
 
-const EggPic = ({className, picId, width}) => {
-    return <img
-        className={className || ''}
-        src={`https://res.cloudinary.com/do8cebkqd/image/upload/c_thumb,w_${width || 200},g_face/v1586394745/${picId}.jpg`}
-    />
-};
-
 const Egg = ({name, picIds, id}) => {
     const [addPic, {loading: saving}] = useMutation(ADD_PIC, {
         refetchQueries: ['MyEggs'],
@@ -97,29 +91,6 @@ const EggList = () => {
     </div>;
 
     return data.myEggs.map(e => <Egg {...e}/>);
-};
-
-const Modal = ({placeholder, children}) => {
-    const [open, setOpen] = useState(false);
-    const C = placeholder;
-
-    return <>
-        <button className='z-40' onClick={() => setOpen(!open)}><C/></button>
-        {!open ? null : <div className='fixed top-0 left-0 w-full h-full z-50'>
-            <div className='opacity-50 bg-black w-full h-full' onClick={() => setOpen(false)}/>
-            <div className='absolute opacity-100 bg-white p-2 w-1/2 rounded flex flex-col'
-                 style={{left: '25%', top: '15%'}}>
-                <div className='h-4 text-right'>
-                    <button onClick={() => setOpen(false)}>
-                        <i className='fas fa-times'/>
-                    </button>
-                </div>
-                <div className='flex-grow'>
-                    {children({close: () => setOpen(false)})}
-                </div>
-            </div>
-        </div>}
-    </>;
 };
 
 const AddEggs = () => {
