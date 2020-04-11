@@ -4,6 +4,7 @@ import {Loader} from "../components/loader";
 import * as React from "react";
 import {Modal} from "../components/modal";
 import {EggHeader} from "../components/eggheader";
+import {useState} from "react";
 
 const ALL_EGGS = gql`
     query AllEggs {
@@ -46,6 +47,8 @@ const Egg = ({id, name, picIds, liked}) => {
 };
 
 const Vote = () => {
+    const [filteredToLiked, setFilteredToLike] = useState(false);
+
     const {data, loading, error} = useQuery(ALL_EGGS);
     const {data: likesData, loading: likesLoading, error: likesError} = useQuery(LIKES);
 
@@ -53,11 +56,19 @@ const Vote = () => {
         <div className='w-32 mx-auto flex justify-around mt-32'><Loader/></div>
     </div>;
 
+    const liked = (e) => !likesData ? false : likesData.likes.filter(i => i.id === e.id).length > 0;
+
     return <div>
-        <h1 className='text-2xl'>Vote</h1>
+        <div className='flex items-center'>
+            <h1 className='text-2xl mr-5'>Vote</h1>
+            <div>
+                <input id='filter-starred' type='checkbox' className='mr-1' value={filteredToLiked}
+                       onChange={() => setFilteredToLike(!filteredToLiked)}/>
+                <label htmlFor='filter-starred'>Only show starred eggs</label>
+            </div>
+        </div>
         <div className='flex flex-wrap'>
-            {data.allEggs.map(e => <Egg {...e}
-                                        liked={!likesData ? false : likesData.likes.filter(i => i.id === e.id).length > 0}/>)}
+            {data.allEggs.filter(e => !filteredToLiked || liked(e)).map(e => <Egg {...e} liked={liked(e)}/>)}
         </div>
     </div>;
 };
