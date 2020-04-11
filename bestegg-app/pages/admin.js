@@ -32,7 +32,7 @@ const Admin = () => {
                 <th className='text-left' colSpan={2}>Egg</th>
                 <th className='text-left'>Votes</th>
             </tr>
-            {data.allVotes.sort((a, b) => b.likes - a.likes).map(i => <tr className='border-t border-subtle'>
+            {data.allVotes.slice().sort((a, b) => b.likes - a.likes).map(i => <tr className='border-t border-subtle'>
                 <td className='pr-2 pt-1'>{i.egg.name}</td>
                 <td className='pr-2 pl-2 pt-1'><EggPic picId={i.egg.picIds[0]} width={40}/></td>
                 <td className='pl-2 pt-1'>{i.likes}</td>
