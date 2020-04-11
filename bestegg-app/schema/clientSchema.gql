@@ -20,11 +20,17 @@ type Egg {
     id: String!
 }
 
+type VotingResult {
+    egg: Egg
+    likes: Int
+}
+
 type Query {
     myEggs: [Egg!]!
     test: String!
     allEggs: [Egg!]!
     likes: [Egg!]!
+    allVotes: [VotingResult!]!
 }
 
 schema {

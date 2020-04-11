@@ -36,12 +36,14 @@ export const Auth0Provider = ({children}) => {
             if (isAuthenticated) {
                 try {
                     setToken(await auth0Client.getTokenSilently({
-                        audience: process.env.NEXT_AUDIENCE
+                        audience: process.env.NEXT_AUDIENCE,
+                        scope: 'admin'
                     }));
                 } catch (e) {
                     if (e.error === 'consent_required') {
                         setToken(await auth0Client.getTokenWithPopup({
-                            audience: process.env.NEXT_AUDIENCE
+                            audience: process.env.NEXT_AUDIENCE,
+                            scope: 'admin'
                         }));
                     }
                 }

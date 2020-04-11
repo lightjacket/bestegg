@@ -55,7 +55,7 @@ const root = {
             }
         `, {eggId});
 
-        if(data.user !== user) {
+        if (data.user !== user) {
             throw new Error('access denied');
         }
 
@@ -118,12 +118,14 @@ const root = {
             }
         `, {eggId});
 
-        if(data.user !== user) {
+        if (data.user !== user) {
             throw new Error('access denied');
         }
 
         await Promise.all(data.picIds.map(i => new Promise((resolve) => {
-            cloudinary.uploader.destroy(i, function(result) { resolve(result) });
+            cloudinary.uploader.destroy(i, function (result) {
+                resolve(result)
+            });
         })));
 
         await faunadb.request(`
@@ -184,6 +186,36 @@ const root = {
 
         return data.map(i => ({id: i.egg._id}))
     },
+    allVotes: async ({}, {user, permissions}) => {
+        if (permissions.filter(p => p === 'admin').length === 0) {
+            throw Error('access denied');
+        }
+
+        const {allLikes: {data}} = await faunadb.request(`
+           query AllVotes {
+              allLikes {
+                data {
+                  egg {
+                    name
+                    _id
+                    picIds
+                  }
+                  _id
+                }
+              }
+            }
+        `);
+
+        let counts = data.reduce((acc, i) => ({
+            ...acc,
+            [JSON.stringify(i.egg)]: ((acc[JSON.stringify(i.egg)] || 0) + 1)
+        }), {});
+
+        return Object.keys(counts).map(k => {
+            let e = JSON.parse(k);
+            return {egg: {id: e._id, name: e.name, picIds: e.picIds}, likes: counts[k]};
+        });
+    },
     test: async ({}, {user}) => {
         return 'hello!';
     }
@@ -197,7 +229,14 @@ async function handler(req, res) {
         res.end('Forbidden');
         return;
     }
-    const result = await graphql(schema, req.body.query, root, {user: req.user.sub}, req.body.variables);
+    console.log('req', req);
+    const result = await graphql(
+        schema,
+        req.body.query,
+        root,
+        {user: req.user.sub, permissions: req.user.permissions},
+        req.body.variables
+    );
     res.end(JSON.stringify(result));
 }
 

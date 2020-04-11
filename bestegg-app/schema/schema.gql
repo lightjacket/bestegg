@@ -12,4 +12,5 @@ type Like {
 type Query {
   allOfTheEggs: [Egg!]!
   likesForUser(user: String!): [Like!]!
+  allLikes: [Like!]!
 }
