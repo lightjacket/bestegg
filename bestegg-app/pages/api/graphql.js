@@ -3,6 +3,7 @@ import * as jwks from "jwks-rsa";
 import {buildSchema, graphql} from 'graphql';
 import {GraphQLClient} from "graphql-request";
 import schemaStr from '../../schema/clientSchema.gql';
+import * as cloudinary from "cloudinary";
 
 const schema = buildSchema(schemaStr);
 
@@ -33,6 +34,12 @@ const faunadb = new GraphQLClient('https://graphql.fauna.com/graphql', {
     headers: {
         Authorization: `Bearer ${process.env.NEXT_FAUNADB_SECRET}`
     }
+});
+
+cloudinary.config({
+    cloud_name: process.env.NEXT_CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.NEXT_CLOUDINARY_API_KEY,
+    api_secret: process.env.NEXT_CLOUDINARY_API_SECRET
 });
 
 // The root provides a resolver function for each API endpoint
@@ -86,6 +93,35 @@ const root = {
         `, {user, name, picIds});
         // {createEgg: {_id: eggId}}
         return {id: result.createEgg._id};
+    },
+    deleteEgg: async ({eggId}, {user}) => {
+        const {findEggByID: data} = await faunadb.request(`
+            query FindEgg($eggId: ID!) {
+              findEggByID(id: $eggId) {
+                name
+                picIds
+                user
+              }
+            }
+        `, {eggId});
+
+        if(data.user !== user) {
+            throw new Error('access denied');
+        }
+
+        await Promise.all(data.picIds.map(i => new Promise((resolve) => {
+            cloudinary.uploader.destroy(i, function(result) { resolve(result) });
+        })));
+
+        await faunadb.request(`
+            mutation DeleteEgg($eggId: ID!) {
+              deleteEgg(id: $eggId) {
+                _id
+              }
+            }
+        `, {eggId: eggId});
+
+        return {status: 'ok'};
     },
     test: async ({}, {user}) => {
         return 'hello!';

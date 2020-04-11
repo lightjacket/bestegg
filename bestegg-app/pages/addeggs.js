@@ -24,9 +24,49 @@ const ADD_PIC = gql`
     }
 `;
 
-const Egg = ({name, picIds, id}) => {
-    console.log('id', id);
+const DELETE_EGG = gql`
+    mutation DeleteEgg($eggId: ID!) {
+        deleteEgg(eggId: $eggId) {
+            status
+        }
+    }
+`;
 
+const DeleteEgg = ({id}) => {
+    const [deleteEgg, {loading: saving}] = useMutation(DELETE_EGG, {
+        variables: {eggId: id},
+        refetchQueries: ['MyEggs'],
+        awaitRefetchQueries: true
+    });
+
+    return <Modal placeholder={() => {
+        return <div className='rounded p-2 bg-red-600 text-white ml-2'>Delete Egg</div>
+    }}>{({close}) => {
+        return <div>
+            <div className='mb-4'>Are you sure you want to delete this egg?</div>
+            <div className='flex justify-end'>
+                <SmallLoader/>
+                <button className='p-2 px-5 rounded text-white bg-red-600' onClick={async () => {
+                    await deleteEgg();
+                    close();
+                }}>
+                    Yes
+                </button>
+                <button className='p-2 rounded border border-subtle rounded ml-2' onClick={close}>Cancel</button>
+            </div>
+        </div>
+    }}
+    </Modal>;
+};
+
+const EggPic = ({className, picId, width}) => {
+    return <img
+        className={className || ''}
+        src={`https://res.cloudinary.com/do8cebkqd/image/upload/c_thumb,w_${width || 200},g_face/v1586394745/${picId}.jpg`}
+    />
+};
+
+const Egg = ({name, picIds, id}) => {
     const [addPic, {loading: saving}] = useMutation(ADD_PIC, {
         refetchQueries: ['MyEggs'],
         awaitRefetchQueries: true
@@ -35,20 +75,16 @@ const Egg = ({name, picIds, id}) => {
     return <div className='border-subtle border-b pb-2 mb-2 mt-2'>
         <div className='flex justify-between w-full'>
             <h3 className='mr-2 text-lg'>{name}</h3>
-            <div className='flex'>
+            <div className='flex relative'>
                 {saving ? <SmallLoader/> : null}
                 <Upload onUpload={(i) => addPic({variables: {picId: i, eggId: id}})}>
                     <div className='border border-subtle rounded p-2'>Add a pic</div>
                 </Upload>
+                <DeleteEgg id={id}/>
             </div>
         </div>
         <div className='flex flex-wrap'>
-            {picIds.map(i => {
-                return <img
-                    className='pr-2'
-                    src={`https://res.cloudinary.com/do8cebkqd/image/upload/c_thumb,w_200,g_face/v1586394745/${i}.jpg`}
-                />
-            })}
+            {picIds.map(i => <EggPic picId={i} className='pr-2'/>)}
         </div>
     </div>
 };
@@ -67,25 +103,26 @@ const Modal = ({placeholder, children}) => {
     const [open, setOpen] = useState(false);
     const C = placeholder;
 
-    if (!open) return <button onClick={() => setOpen(!open)}><C/></button>;
-    return <div className='fixed top-0 left-0 w-full h-full'>
-        <div className='opacity-50 bg-black w-full h-full' onClick={() => setOpen(false)}/>
-        <div className='absolute opacity-100 bg-white p-2 w-1/2 rounded flex flex-col'
-             style={{left: '50%', top: '50%', marginLeft: '-25%', marginTop: '-35%', height: '70%'}}>
-            <div className='h-4 text-right'>
-                <button onClick={() => setOpen(false)}>
-                    <i className='fas fa-times'/>
-                </button>
+    return <>
+        <button className='z-40' onClick={() => setOpen(!open)}><C/></button>
+        {!open ? null : <div className='fixed top-0 left-0 w-full h-full z-50'>
+            <div className='opacity-50 bg-black w-full h-full' onClick={() => setOpen(false)}/>
+            <div className='absolute opacity-100 bg-white p-2 w-1/2 rounded flex flex-col'
+                 style={{left: '25%', top: '15%'}}>
+                <div className='h-4 text-right'>
+                    <button onClick={() => setOpen(false)}>
+                        <i className='fas fa-times'/>
+                    </button>
+                </div>
+                <div className='flex-grow'>
+                    {children({close: () => setOpen(false)})}
+                </div>
             </div>
-            <div className='flex-grow'>
-                {children({close: () => setOpen(false)})}
-            </div>
-        </div>
-    </div>;
+        </div>}
+    </>;
 };
 
 const AddEggs = () => {
-
     return <div>
         <Head>
             <title>Add Eggs</title>
@@ -133,8 +170,8 @@ const NewEgg = () => {
                 </tr>
                 </tbody>
             </table>
-            <div className='flex-grow'>
-                {picIds.map(i => <Image publicId={i.id} width={100}/>)}
+            <div className='flex-grow flex mt-2'>
+                {picIds.map(i => <EggPic picId={i} className='pr-2' width={80}/>)}
             </div>
             <div className='p-1 flex justify-end'>
                 {saving ? <SmallLoader/> : null}

@@ -9,6 +9,7 @@ type AddEgg {
 type Mutation {
     addEggPic(eggPicId: String!, eggId: String!): Status!
     addEgg(name: String!, picIds: [String!]!): AddEgg!
+    deleteEgg(eggId: ID!): Status!
 }
 
 type Egg {
