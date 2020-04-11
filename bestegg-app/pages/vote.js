@@ -24,9 +24,9 @@ const Egg = ({id, name, picIds}) => {
                     placeholder={() => <span className='text-blue-500 underline'>See more</span>}
                     style={{height: '70%'}}
                 >{({close}) => {
-                    return <div className='overflow-scroll h-full'>
+                    return <div className='flex flex-col h-full'>
                         <h3 className='text-2xl'>{name.length === 0 ? 'Unnamed' : name}</h3>
-                        <div className='flex flex-wrap'>
+                        <div className='flex flex-wrap flex-grow overflow-y-scroll min-h-0'>
                             {picIds.map(i => <EggPic key={i} picId={i} width={180}/>)}
                         </div>
                     </div>

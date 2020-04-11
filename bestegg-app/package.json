@@ -30,6 +30,7 @@
     "react-query": "^1.2.1",
     "react-spinkit": "^3.0.0",
     "react-spinners": "^0.8.1",
+    "react-virtualized-auto-sizer": "^1.0.2",
     "tailwindcss": "^1.2.0"
   },
   "devDependencies": {

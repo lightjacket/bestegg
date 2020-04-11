@@ -15,7 +15,7 @@ export const Modal = ({placeholder, children, style}) => {
                         <i className='fas fa-times'/>
                     </button>
                 </div>
-                <div className='flex-grow'>
+                <div className='flex-grow min-h-0'>
                     {children({close: () => setOpen(false)})}
                 </div>
             </div>
