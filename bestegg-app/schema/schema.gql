@@ -4,6 +4,12 @@ type Egg {
     user: String!
 }
 
+type Like {
+    egg: Egg!
+    user: String!
+}
+
 type Query {
   allOfTheEggs: [Egg!]!
+  likesForUser(user: String!): [Like!]!
 }

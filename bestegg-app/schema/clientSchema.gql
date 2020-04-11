@@ -10,6 +10,8 @@ type Mutation {
     addEggPic(eggPicId: String!, eggId: String!): Status!
     addEgg(name: String!, picIds: [String!]!): AddEgg!
     deleteEgg(eggId: ID!): Status!
+    likeEgg(eggId: ID!): Status!
+    unlikeEgg(eggId: ID!): Status!
 }
 
 type Egg {
@@ -22,6 +24,7 @@ type Query {
     myEggs: [Egg!]!
     test: String!
     allEggs: [Egg!]!
+    likes: [Egg!]!
 }
 
 schema {

@@ -105,7 +105,6 @@ const root = {
               }
            }
         `, {user, name, picIds});
-        // {createEgg: {_id: eggId}}
         return {id: result.createEgg._id};
     },
     deleteEgg: async ({eggId}, {user}) => {
@@ -136,6 +135,54 @@ const root = {
         `, {eggId: eggId});
 
         return {status: 'ok'};
+    },
+    likeEgg: async ({eggId}, {user}) => {
+        await faunadb.request(`
+           mutation AddLike($user: String!, $eggId: ID!) {
+              createLike(data: {user: $user, egg: {connect: $eggId}}) {
+                _id
+              }
+           }
+        `, {user, eggId});
+        return {status: 'ok'};
+    },
+    unlikeEgg: async ({eggId}, {user}) => {
+        const {likesForUser: {data}} = await faunadb.request(`
+           query LikesForUser($user: String!) {
+              likesForUser(user: $user) {
+                data {
+                  _id
+                  egg {
+                    _id
+                  }
+                }
+              }
+            }
+        `, {user});
+        const id = data.filter(i => i.egg._id === eggId).map(i => i._id)[0];
+        await faunadb.request(`
+           mutation DeleteLike($likeId: ID!) {
+              deleteLike(id: $likeId) {
+                _id
+              }
+            }
+        `, {likeId: id});
+        return {status: 'ok'};
+    },
+    likes: async ({}, {user}) => {
+        const {likesForUser: {data}} = await faunadb.request(`
+           query LikesForUser($user: String!) {
+              likesForUser(user: $user) {
+                data {
+                  egg {
+                    _id
+                  }
+                }
+              }
+            }
+        `, {user});
+
+        return data.map(i => ({id: i.egg._id}))
     },
     test: async ({}, {user}) => {
         return 'hello!';
