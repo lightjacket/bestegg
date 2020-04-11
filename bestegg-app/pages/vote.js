@@ -46,6 +46,8 @@ const Egg = ({id, name, picIds, liked}) => {
     </div>
 };
 
+let NUM_VOTES = 10;
+
 const Vote = () => {
     const [filteredToLiked, setFilteredToLike] = useState(false);
 
@@ -58,13 +60,18 @@ const Vote = () => {
 
     const liked = (e) => !likesData ? false : likesData.likes.filter(i => i.id === e.id).length > 0;
 
+    const numLiked = data.allEggs.filter(e => liked(e)).length;
+
     return <div>
-        <div className='flex items-center'>
-            <h1 className='text-2xl mr-5'>Vote</h1>
+        <div className='flex items-end align-baseline'>
+            <h1 className='text-2xl mr-5 py-0'>Vote</h1>
+            <div className={'border-subtle border-r pr-2 mr-2 ' + (numLiked > NUM_VOTES ? 'text-red-500' : '')}>
+                {numLiked} of 10 votes used
+            </div>
             <div>
                 <input id='filter-starred' type='checkbox' className='mr-1' value={filteredToLiked}
                        onChange={() => setFilteredToLike(!filteredToLiked)}/>
-                <label htmlFor='filter-starred'>Only show starred eggs</label>
+                <label htmlFor='filter-starred'>Only show eggs you've voted for</label>
             </div>
         </div>
         <div className='flex flex-wrap'>
