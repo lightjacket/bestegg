@@ -22,8 +22,6 @@ const Admin = () => {
         <div className='w-32 mx-auto flex justify-around mt-32'><Loader/></div>
     </div>;
 
-    console.log('data', data);
-
     return <div>
         <h1 className='text-2xl mb-3'>All Votes</h1>
         <table className='w-full'>
