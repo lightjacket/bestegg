@@ -60,8 +60,8 @@ const root = {
         }
 
         await faunadb.request(`
-            mutation AddPic($name: String!, $picIds: [String!]!, $user: String!, $eggId: ID!) {
-              updateEgg(id: $eggId, data: {name: $name, picIds: $picIds, user: $user}) {
+            mutation AddPic($name: String!, $picIds: [String!]!, $user: String!, $eggId: ID!, $movesOn: Boolean!) {
+              updateEgg(id: $eggId, data: {name: $name, picIds: $picIds, user: $user, movesOn: $movesOn}) {
                 _id
               }
             }
@@ -101,7 +101,7 @@ const root = {
     addEgg: async ({name, picIds}, {user}) => {
         const result = await faunadb.request(`
            mutation CreateEgg($name: String!, $user: String!, $picIds: [String!]!) {
-              createEgg(data: {name: $name, picIds: $picIds, user: $user}) {
+              createEgg(data: {name: $name, picIds: $picIds, user: $user, movesOn: false}) {
                 _id
               }
            }
