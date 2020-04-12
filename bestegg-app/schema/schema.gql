@@ -6,7 +6,7 @@ type Egg {
 }
 
 type Like {
-    egg: Egg!
+    egg: Egg
     user: String!
     rank: Int
 }

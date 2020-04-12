@@ -246,12 +246,12 @@ const root = {
             }
         `);
 
-        let countsByUser = data.reduce((acc, i) => ({
+        let countsByUser = data.filter(i => !!i.egg).reduce((acc, i) => ({
             ...acc,
             [i.egg.user]: ((acc[i.egg.user] || 0) + 1)
         }), {});
 
-        let counts = data.reduce((acc, i) => ({
+        let counts = data.filter(i => !!i.egg).reduce((acc, i) => ({
             ...acc,
             [JSON.stringify(i.egg)]: (acc[JSON.stringify(i.egg)] || 0) + (countsByUser[i.egg.user] <= 10 ? 1 : 0)
         }), {});
