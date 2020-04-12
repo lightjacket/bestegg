@@ -154,6 +154,8 @@ const NewEgg = () => {
                         className='p-2 border border-subtle rounded disabled:opacity-50'
                         onClick={async () => {
                             await addEgg({variables: {name, picIds}});
+                            setPicIds([]);
+                            setName('');
                             close();
                         }}
                         disabled={picIds.length === 0}
