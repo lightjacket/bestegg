@@ -65,7 +65,7 @@ const root = {
                 _id
               }
             }
-        `, {...data, eggId, picIds: [eggPicId, ...data.picIds]});
+        `, {...data, picIds: [eggPicId, ...data.picIds]});
 
         return {status: 'ok'};
     },
@@ -91,11 +91,12 @@ const root = {
                   name
                   _id
                   picIds
+                  movesOn
                 }
               }
             }
         `);
-        return allOfTheEggs.data.map(e => ({name: e.name, picIds: e.picIds, id: e._id}));
+        return allOfTheEggs.data.map(e => ({name: e.name, picIds: e.picIds, id: e._id, movesOn: e.movesOn || false}));
     },
     addEgg: async ({name, picIds}, {user}) => {
         const result = await faunadb.request(`
@@ -138,14 +139,14 @@ const root = {
 
         return {status: 'ok'};
     },
-    likeEgg: async ({eggId}, {user}) => {
+    likeEgg: async ({eggId, rank}, {user}) => {
         await faunadb.request(`
-           mutation AddLike($user: String!, $eggId: ID!) {
-              createLike(data: {user: $user, egg: {connect: $eggId}}) {
+           mutation AddLike($user: String!, $eggId: ID!, $rank: Int) {
+              createLike(data: {user: $user, rank: $rank, egg: {connect: $eggId}}) {
                 _id
               }
            }
-        `, {user, eggId});
+        `, {user, eggId, rank});
         return {status: 'ok'};
     },
     unlikeEgg: async ({eggId}, {user}) => {
@@ -176,22 +177,28 @@ const root = {
            query LikesForUser($user: String!) {
               likesForUser(user: $user) {
                 data {
+                  rank
                   egg {
                     _id
+                    name
+                    user
+                    picIds
                   }
                 }
+              }
+              
+              allFlags {
+                votingMode
               }
             }
         `, {user});
 
-        return data.map(i => ({id: i.egg._id}))
+        return data.map(i => ({egg: {...i.egg, id: i.egg._id}, rank: i.rank}))
     },
     allVotes: async ({}, {user, permissions}) => {
         if (permissions.filter(p => p === 'admin').length === 0) {
             throw Error('access denied');
         }
-
-
 
         const {allLikes: {data}} = await faunadb.request(`
            query AllVotes {
@@ -202,6 +209,7 @@ const root = {
                     _id
                     picIds
                     user
+                    movesOn
                   }
                   _id
                 }
@@ -221,8 +229,109 @@ const root = {
 
         return Object.keys(counts).map(k => {
             let e = JSON.parse(k);
-            return {egg: {id: e._id, name: e.name, picIds: e.picIds}, likes: counts[k]};
+            return {egg: {id: e._id, name: e.name, picIds: e.picIds, movesOn: e.movesOn || false}, likes: counts[k]};
         });
+    },
+    setMovesOn: async ({eggId, movesOn}, {user, permissions}) => {
+        if (permissions.filter(p => p === 'admin').length === 0) {
+            throw Error('access denied');
+        }
+
+        const {findEggByID: data} = await faunadb.request(`
+            query FindEgg($eggId: ID!) {
+              findEggByID(id: $eggId) {
+                name
+                picIds
+                user
+              }
+            }
+        `, {eggId});
+
+        await faunadb.request(`
+            mutation MoveToRound2($name: String!, $picIds: [String!]!, $user: String!, $eggId: ID!, $movesOn: Boolean!) {
+              updateEgg(id: $eggId, data: {name: $name, picIds: $picIds, user: $user, movesOn: $movesOn}) {
+                _id
+              }
+            }
+        `, {...data, eggId, movesOn});
+
+        return {status: 'ok'};
+    },
+    votingMode: async ({}, {}) => {
+        const {allFlags: {votingMode}} = await faunadb.request(`
+            query VotingMode {
+              allFlags {
+                votingMode
+              }
+            }
+        `);
+        return votingMode;
+    },
+    setRound: async ({round}, {user, permissions}) => {
+        if (permissions.filter(p => p === 'admin').length === 0) {
+            throw Error('access denied');
+        }
+
+        await faunadb.request(`
+            mutation SetVotingMode($round: String!) {
+              updateAppFlags(id: 262558481573216786, data: {votingMode: $round}) {
+                _id
+              }
+            }
+        `, {round});
+
+        return {status: 'ok'};
+    },
+    setRank: async ({eggId, rank}, {user}) => {
+        const {likesForUser: {data}} = await faunadb.request(`
+           query LikesForUser($user: String!) {
+              likesForUser(user: $user) {
+                data {
+                  _id
+                  egg {
+                    _id
+                  }
+                }
+              }
+            }
+        `, {user});
+
+        const id = data.filter(i => i.egg._id === eggId).map(i => i._id)[0];
+
+        if (!rank && !id) {
+            return {status: 'ok'};
+        }
+
+        if (!rank && id) {
+            await faunadb.request(`
+               mutation DeleteLike($likeId: ID!) {
+                  deleteLike(id: $likeId) {
+                    _id
+                  }
+                }
+            `, {likeId: id});
+            return {status: 'ok'};
+        }
+
+        if (!id && rank) {
+            await faunadb.request(`
+               mutation AddLike($user: String!, $eggId: ID!, $rank: Int) {
+                  createLike(data: {user: $user, rank: $rank, egg: {connect: $eggId}}) {
+                    _id
+                  }
+               }
+            `, {user, eggId, rank});
+            return {status: 'ok'};
+        }
+
+        await faunadb.request(`
+           mutation UpdateLike($likeId: ID!, $rank: Int, $user: String!) {
+              updateLike(id: $likeId, data: {rank: $rank, user: $user}) {
+                _id
+              }
+           }
+        `, {likeId: id, rank, user});
+        return {status: 'ok'};
     },
     test: async ({}, {user}) => {
         return 'hello!';
@@ -237,7 +346,6 @@ async function handler(req, res) {
         res.end('Forbidden');
         return;
     }
-    console.log('req', req);
     const result = await graphql(
         schema,
         req.body.query,

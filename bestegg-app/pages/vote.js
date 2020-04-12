@@ -13,20 +13,36 @@ const ALL_EGGS = gql`
             id
             picIds
         }
+
+        votingMode
     }
 `;
 
 const LIKES = gql`
     query Likes {
         likes {
-            id
+            egg {
+                id
+            }
+            rank
         }
     }
 `;
 
-const Egg = ({id, name, picIds, liked}) => {
+const Egg = ({id, name, picIds, liked, votingMode, remainingRanks, rank}) => {
+    const Header = () => {
+        return <EggHeader
+            id={id}
+            name={name}
+            liked={liked}
+            ranked={votingMode === 'round 2'}
+            unusedRanks={remainingRanks}
+            rank={rank}
+        />
+    };
+
     return <div className='m-2 p-2 border-r border-subtle pr-6'>
-        <EggHeader id={id} name={name} liked={liked}/>
+        <Header/>
         <div><EggPic picId={picIds[0]} width={120}/></div>
         <div className='w-full'>{
             picIds.length > 1
@@ -35,7 +51,7 @@ const Egg = ({id, name, picIds, liked}) => {
                     style={{height: '80%', top: '10%', left: '10%', width: '80%'}}
                 >{({close}) => {
                     return <div className='flex flex-col h-full'>
-                        <EggHeader id={id} name={name} liked={liked}/>
+                        <Header/>
                         <div className='flex flex-wrap flex-grow overflow-y-scroll min-h-0'>
                             {picIds.map(i => <EggPic key={i} picId={i} width={180}/>)}
                         </div>
@@ -58,9 +74,16 @@ const Vote = () => {
         <div className='w-32 mx-auto flex justify-around mt-32'><Loader/></div>
     </div>;
 
-    const liked = (e) => !likesData ? false : likesData.likes.filter(i => i.id === e.id).length > 0;
+    const liked = (e) => !likesData ? false : likesData.likes.filter(i => i.egg.id === e.id).length > 0;
+    const rank = (e) => !likesData ? false : likesData.likes
+        .filter(i => i.egg.id === e.id && i.rank)
+        .reduce((acc, i) => acc || i.rank, null);
 
     const numLiked = data.allEggs.filter(e => liked(e)).length;
+    const usedRanks = likesData
+        ? likesData.likes.filter(i => i.rank).reduce((acc, i) => [...acc, i.rank], [])
+        : [];
+    const remainingRanks = [1, 2, 3].filter(i => usedRanks.indexOf(i) === -1);
 
     return <div>
         <div className='flex items-end align-baseline'>
@@ -69,13 +92,16 @@ const Vote = () => {
                 {numLiked} of 10 votes used
             </div>
             <div>
-                <input id='filter-starred' type='checkbox' className='mr-1' value={filteredToLiked}
+                <input id='filter-starred' type='checkbox' className='mr-1' checked={filteredToLiked}
                        onChange={() => setFilteredToLike(!filteredToLiked)}/>
                 <label htmlFor='filter-starred'>Only show eggs you've voted for</label>
             </div>
         </div>
         <div className='flex flex-wrap'>
-            {data.allEggs.filter(e => !filteredToLiked || liked(e)).map(e => <Egg {...e} liked={liked(e)}/>)}
+            {data.allEggs.filter(e => !filteredToLiked || liked(e)).map(e => (
+                <Egg {...e} rank={rank(e)} votingMode={data.votingMode} liked={liked(e)}
+                     remainingRanks={remainingRanks}/>
+            ))}
         </div>
     </div>;
 };

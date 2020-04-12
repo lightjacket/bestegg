@@ -10,14 +10,18 @@ type Mutation {
     addEggPic(eggPicId: String!, eggId: String!): Status!
     addEgg(name: String!, picIds: [String!]!): AddEgg!
     deleteEgg(eggId: ID!): Status!
-    likeEgg(eggId: ID!): Status!
+    likeEgg(eggId: ID!, rank: Int): Status!
     unlikeEgg(eggId: ID!): Status!
+    setMovesOn(eggId: ID!, movesOn: Boolean!): Status!
+    setRound(round: String!): Status!
+    setRank(eggId: ID!, rank: Int): Status!
 }
 
 type Egg {
     picIds: [String!]!
     name: String!
     id: String!
+    movesOn: Boolean!
 }
 
 type VotingResult {
@@ -25,12 +29,18 @@ type VotingResult {
     likes: Int
 }
 
+type Like {
+    egg: Egg!
+    rank: Int
+}
+
 type Query {
     myEggs: [Egg!]!
     test: String!
     allEggs: [Egg!]!
-    likes: [Egg!]!
+    likes: [Like!]!
     allVotes: [VotingResult!]!
+    votingMode: String!
 }
 
 schema {

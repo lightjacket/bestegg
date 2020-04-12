@@ -2,15 +2,22 @@ type Egg {
     picIds: [String!]!
     name: String!
     user: String!
+    movesOn: Boolean!
 }
 
 type Like {
     egg: Egg!
     user: String!
+    rank: Int
+}
+
+type AppFlags {
+    votingMode: String!
 }
 
 type Query {
   allOfTheEggs: [Egg!]!
   likesForUser(user: String!): [Like!]!
   allLikes: [Like!]!
+  allFlags: AppFlags!
 }
