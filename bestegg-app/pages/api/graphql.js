@@ -229,8 +229,14 @@ const root = {
             throw Error('access denied');
         }
 
-        const {allLikes: {data, after}} = await faunadb.request(`
+        const scoring = {1: 3, 2: 2, 3: 1};
+
+        const {allLikes: {data, after}, allFlags: {votingMode}} = await faunadb.request(`
            query AllVotes {
+              allFlags {
+                votingMode
+              }
+           
               allLikes {
                 data {
                   egg {
@@ -242,6 +248,7 @@ const root = {
                   }
                   _id
                   user
+                  rank
                 }
                 after
               }
@@ -264,6 +271,7 @@ const root = {
                       }
                       _id
                       user
+                      rank
                     }
                     after
                   }
@@ -273,9 +281,11 @@ const root = {
             allLikes = [...allLikes, ...data];
         }
 
+        console.log('voting mode', votingMode);
+
         let counts = allLikes.filter(i => !!i.egg).reduce((acc, i) => ({
             ...acc,
-            [JSON.stringify(i.egg)]: (acc[JSON.stringify(i.egg)] || 0) + 1
+            [JSON.stringify(i.egg)]: (acc[JSON.stringify(i.egg)] || 0) + (votingMode === 'round 2' ? i.rank ? scoring[i.rank] : 0 : 1)
         }), {});
 
         return Object.keys(counts).map(k => {
