@@ -12,6 +12,7 @@ const ALL_EGGS = gql`
             name
             id
             picIds
+            movesOn
         }
 
         votingMode
@@ -98,10 +99,14 @@ const Vote = () => {
             </div>
         </div>
         <div className='flex flex-wrap'>
-            {data.allEggs.filter(e => !filteredToLiked || liked(e)).map(e => (
-                <Egg {...e} rank={rank(e)} votingMode={data.votingMode} liked={liked(e)}
-                     remainingRanks={remainingRanks}/>
-            ))}
+            {data.allEggs
+                .filter(e => !filteredToLiked || liked(e))
+                .filter(i => {
+                    return data.votingMode !== 'round 2' || i.movesOn
+                }).map(e => (
+                    <Egg {...e} rank={rank(e)} votingMode={data.votingMode} liked={liked(e)}
+                         remainingRanks={remainingRanks}/>
+                ))}
         </div>
     </div>;
 };
