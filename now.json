@@ -6,6 +6,8 @@
       "NEXT_AUDIENCE": "@next_audience",
       "NEXT_CLOUDINARY_CLOUD_NAME": "@next_cloudinary_cloud_name",
       "NEXT_CLOUDINARY_PRESET": "@next_cloudinary_preset",
+      "NEXT_CLOUDINARY_API_KEY": "@next_cloudinary_api_key",
+      "NEXT_CLOUDINARY_API_SECRET": "@next_cloudinary_api_secret",
       "NEXT_FAUNADB_SECRET": "@next_faunadb_secret"
     }
   }
