@@ -115,6 +115,7 @@ const root = {
                 name
                 picIds
                 user
+                _id
               }
             }
         `, {eggId});
@@ -128,6 +129,31 @@ const root = {
                 resolve(result)
             });
         })));
+
+        const {allLikes: {data: allLikesData}} = await faunadb.request(`
+           query AllVotes {
+              allLikes {
+                data {
+                  egg {
+                    name
+                    _id
+                    picIds
+                    user
+                    movesOn
+                  }
+                  _id
+                }
+              }
+            }
+        `);
+
+        await Promise.all(allLikesData.filter(i => i.egg._id === eggId).map(i => faunadb.request(`
+           mutation DeleteLike($likeId: ID!) {
+              deleteLike(id: $likeId) {
+                _id
+              }
+            }
+        `, {likeId: i._id})));
 
         await faunadb.request(`
             mutation DeleteEgg($eggId: ID!) {
@@ -183,6 +209,7 @@ const root = {
                     name
                     user
                     picIds
+                    movesOn
                   }
                 }
               }
@@ -193,7 +220,9 @@ const root = {
             }
         `, {user});
 
-        return data.map(i => ({egg: {...i.egg, id: i.egg._id}, rank: i.rank}))
+        let result = data.map(i => ({egg: {...i.egg, id: i.egg._id}, rank: i.rank}));
+        console.log('result', result);
+        return result
     },
     allVotes: async ({}, {user, permissions}) => {
         if (permissions.filter(p => p === 'admin').length === 0) {
