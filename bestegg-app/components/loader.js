@@ -2,9 +2,9 @@ import {DotLoader} from 'react-spinners';
 
 // "#aaffaa"
 export const Loader = ({size}) => {
-    return <div className='m-2'><DotLoader size={size || 70} margin={2} color='#aaffaa'/></div>;
+    return <img src='/loader-70.gif' width={size || 70} height={size || 70}/>
 };
 
 export const SmallLoader = () => {
-    return <Loader size={25}/>;
+    return <img src='/loader-25.gif'/>
 };
