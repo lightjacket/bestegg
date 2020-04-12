@@ -14,20 +14,20 @@ const InnerApp = ({Component, pageProps}) => {
 
     return <>
         <div className='border-b border-subtle flex p-2 justify-between'>
-            <div className='flex'>
-                <span className='mr-6 font-extrabold text-xl mt-auto'><Link href='/'>Best Egg</Link></span>
-                <span className='mr-4 mt-auto'><Link href='/addeggs'>My Eggs</Link></span>
-                <span className='mr-4 mt-auto'><Link href='/vote'>Vote</Link></span>
+            <div className='flex align-middle'>
+                <span className='mr-6 font-extrabold text-xl'><Link href='/'><img src='/bestegg-logo.png'/></Link></span>
+                <span className='mr-4 my-auto'><Link href='/addeggs'>My Eggs</Link></span>
+                <span className='mr-4 my-auto'><Link href='/vote'>Vote</Link></span>
             </div>
             <div className='flex'>
                 {!user
-                    ? <div className='mr-6 font-extrabold mt-auto'>
+                    ? <div className='mr-6 font-extrabold my-auto'>
                         {loading
                             ? null
                             : <button onClick={login}>Login</button>
                         }
                     </div>
-                    : <div className='mr-6 font-extrabold mt-auto'>
+                    : <div className='mr-6 font-extrabold my-auto'>
                         {loading
                             ? null
                             : <button onClick={logout}>Logout</button>
