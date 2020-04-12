@@ -46,7 +46,7 @@ const DeleteEgg = ({id}) => {
         return <div>
             <div className='mb-4'>Are you sure you want to delete this egg?</div>
             <div className='flex justify-end'>
-                <SmallLoader/>
+                {saving ? <SmallLoader/> : null}
                 <button className='p-2 px-5 rounded text-white bg-red-600' onClick={async () => {
                     await deleteEgg();
                     close();
