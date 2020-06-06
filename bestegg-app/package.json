@@ -11,7 +11,7 @@
     "@apollo/client": "^3.0.0-beta.43",
     "@auth0/auth0-spa-js": "^1.6.5",
     "@fortawesome/fontawesome-free": "^5.13.0",
-    "apollo-server": "^2.11.0",
+    "apollo-server": "^2.14.2",
     "apollo-server-express": "^2.11.0",
     "apollo-server-lambda": "^2.11.0",
     "autoprefixer": "^9.7.6",
